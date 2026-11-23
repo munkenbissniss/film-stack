@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="no" data-repo="film-stack">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Film-stack – ferdig mediaserver med Jellyfin på Docker</title>
+<meta name="description" content="Én veiviser setter opp Jellyfin (eller Plex), Sonarr, Radarr, Prowlarr, qBittorrent bak VPN, NZBGet, Bazarr, Seerr og et dashboard på Linux, macOS og Windows.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fog: #EEF1F4;
+    --paper: #F8FAFB;
+    --ink: #18223A;
+    --amber: #E8B04B;
+    --pine: #2F6F5E;
+    --slate: #5B6475;
+    --line: #CDD4DD;
+    --display: "Bricolage Grotesque", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--fog); color: var(--ink);
+    font: 400 1.0625rem/1.6 var(--display); font-optical-sizing: auto;
+  }
+  a { color: inherit; text-underline-offset: .18em; text-decoration-thickness: 1px; }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* ---------- topp ---------- */
+  .top { display: flex; justify-content: space-between; align-items: center; padding-block: 1.4rem; }
+  .mark { font-weight: 800; font-size: 1.15rem; letter-spacing: -.02em; text-decoration: none; }
+  .mark span { color: var(--slate); font-weight: 500; }
+  .top nav { display: flex; gap: 1.4rem; font-size: .95rem; }
+  .top nav a { text-decoration: none; color: var(--slate); }
+  .top nav a:hover { color: var(--ink); }
+
+  /* ---------- hero ---------- */
+  .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 3.5rem; align-items: center; padding-block: 3.5rem 5rem; }
+  h1 {
+    font-size: clamp(2.6rem, 5.4vw, 4.6rem); line-height: .98; letter-spacing: -.035em;
+    font-weight: 800; margin: 0 0 1.4rem; font-variation-settings: "opsz" 96;
+  }
+  .lede { font-size: 1.2rem; max-width: 34ch; color: #2C3650; margin: 0 0 2rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: .6rem; padding: .95rem 1.4rem; border-radius: 999px;
+    background: var(--ink); color: var(--paper); font-weight: 700; text-decoration: none; font-size: 1.02rem;
+  }
+  .btn:hover { background: #24314F; }
+  .btn small { font-weight: 500; opacity: .7; }
+  .quiet { color: var(--slate); font-size: .98rem; }
+  .meta { margin-top: 1.6rem; color: var(--slate); font-size: .92rem; }
+
+  /* terminalen – sidens ene minneverdige element */
+  .term {
+    background: var(--ink); color: #DCE3EE; border-radius: 14px; padding: 1.2rem 1.3rem 1.4rem;
+    font: 400 .84rem/1.75 var(--mono); box-shadow: 0 30px 60px -30px rgba(24,34,58,.55);
+    transform: rotate(.6deg);
+  }
+  .term .bar { display: flex; gap: .4rem; margin-bottom: .9rem; }
+  .term .bar i { width: .65rem; height: .65rem; border-radius: 50%; background: #34405C; }
+  .term .cmd { color: #8E9AB2; }
+  .term .cmd b { color: var(--paper); font-weight: 400; }
+  .term .head { color: var(--amber); margin: .7rem 0 .3rem; }
+  .term .row { display: grid; grid-template-columns: 1.4rem 7.5rem 1fr; white-space: nowrap; }
+  .term .row .ok { color: var(--amber); }
+  .term .row .what { color: #9AA6BD; overflow: hidden; text-overflow: ellipsis; }
+  .term .done { margin-top: .7rem; color: var(--paper); }
+  .term .done span { color: var(--amber); }
+  @media (prefers-reduced-motion: no-preference) {
+    .js .term .row, .js .term .done { opacity: 0; animation: tick .25s ease-out forwards; }
+    @keyframes tick { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+  }
+
+  /* ---------- seksjoner ---------- */
+  section { padding: 4.5rem 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(1.8rem, 3.2vw, 2.5rem); line-height: 1.05; letter-spacing: -.025em; font-weight: 800; margin: 0 0 .8rem; }
+  .intro { max-width: 58ch; color: #2C3650; margin: 0 0 2.6rem; }
+
+  /* tre steg – en ekte rekkefølge */
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; counter-reset: s; }
+  .steps li { counter-increment: s; }
+  .steps li::before {
+    content: counter(s); display: block; font-weight: 800; font-size: 3.4rem; line-height: 1;
+    color: var(--amber); letter-spacing: -.04em; margin-bottom: .7rem;
+  }
+  .steps h3 { margin: 0 0 .4rem; font-size: 1.2rem; letter-spacing: -.01em; }
+  .steps p { margin: 0; color: #2C3650; max-width: 34ch; }
+  .steps code { font: 400 .85em var(--mono); background: var(--paper); border: 1px solid var(--line); padding: .05em .35em; border-radius: 5px; }
+
+  /* TV-guide: portnummer som kanal */
+  .guide { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .guide .ch {
+    display: grid; grid-template-columns: 7.5rem 12rem 1fr; gap: 1.2rem; align-items: baseline;
+    padding: 1rem 1.4rem; border-bottom: 1px solid var(--line);
+  }
+  .guide .ch:last-child { border-bottom: 0; }
+  .guide .num { font: 600 .95rem var(--mono); color: var(--slate); }
+  .guide .num.bg { color: #98A1B1; font-weight: 400; }
+  .guide .name { font-weight: 700; }
+  .guide .desc { color: #2C3650; }
+  .guide .ch.feature { background: #FFF6E3; }
+  .guide .ch.feature .num { color: #9A6A12; }
+
+  /* nedlasting */
+  .dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+  .os {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 1.6rem;
+    display: flex; flex-direction: column; gap: .9rem;
+  }
+  .os.mine { border: 2px solid var(--ink); }
+  .os h3 { margin: 0; font-size: 1.45rem; letter-spacing: -.02em; }
+  .os .you { font-size: .85rem; color: var(--pine); font-weight: 700; }
+  .os p { margin: 0; color: #2C3650; font-size: .98rem; }
+  .os .start { font: 400 .88rem var(--mono); color: var(--slate); }
+  .os .btn { align-self: flex-start; margin-top: auto; }
+  .os .note { font-size: .9rem; color: var(--slate); }
+
+  /* selv-listen og avslutning */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; }
+  .plain { margin: 0; padding-left: 1.2rem; }
+  .plain li { margin-bottom: .55rem; color: #2C3650; }
+  .plain li::marker { color: var(--pine); }
+  .aside { color: var(--slate); font-size: .98rem; max-width: 52ch; }
+  footer { border-top: 1px solid var(--line); padding: 2.2rem 0 3rem; color: var(--slate); font-size: .92rem; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
+
+  @media (max-width: 900px) {
+    .hero, .two { grid-template-columns: 1fr; gap: 2.5rem; }
+    .term { transform: none; }
+    .steps, .dl { grid-template-columns: 1fr; }
+    .guide .ch { grid-template-columns: 6rem 1fr; row-gap: .2rem; }
+    .guide .desc { grid-column: 2; }
+    .top nav a.hide-s { display: none; }
+  }
+  @media (max-width: 480px) {
+    .term { font-size: .74rem; padding: 1rem; }
+    .term .row { grid-template-columns: 1.2rem 6.4rem 1fr; }
+  }
+
+  .langnav{display:inline-flex;gap:1.1rem;align-items:center}
+  .home-link{font-weight:600}
+</style>
+<link rel="alternate" hreflang="nb" href="./">
+<link rel="alternate" hreflang="en" href="en/">
+</head>
+<body>
+<script>document.documentElement.classList.add("js")</script>
+
+<header class="wrap top">
+  <a class="mark" href="#">film-stack <span id="ver"></span></a>
+  <nav>
+    <a class="home-link" href="/">Alle prosjekter</a>
+    <a href="#steg" class="hide-s">Slik fungerer det</a>
+    <a href="#innhold" class="hide-s">Innhold</a>
+    <a href="#last-ned">Last ned</a>
+    <a class="repo-link hide-s" href="#">GitHub</a>
+    <a href="en/" hreflang="en" lang="en">English</a>
+  </nav>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <h1>Fra tom maskin til ferdig mediaserver.</h1>
+      <p class="lede">Én veiviser setter opp Jellyfin og alt rundt den på Docker, og kobler appene sammen for deg. Gratis og åpen kildekode hele veien. Plex kan velges i stedet.</p>
+      <div class="actions">
+        <a class="btn" id="primary" href="#last-ned">Last ned <small id="primary-os"></small></a>
+        <a class="quiet" href="#last-ned">Andre systemer</a>
+      </div>
+      <p class="meta">Linux, macOS og Windows. Gratis og åpen kildekode.</p>
+    </div>
+
+    <div class="term" role="img" aria-label="Oppsummering fra oppsettet: alle appene er satt opp og klare.">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <div class="cmd">$ <b>docker compose logs -f autoconfig</b></div>
+      <div class="head">OPPSUMMERING</div>
+      <div class="row"><span class="ok">✔</span><span>Jellyfin</span><span class="what">bibliotek og administrator klare</span></div>
+      <div class="row"><span class="ok">✔</span><span>qBittorrent</span><span class="what">bak VPN</span></div>
+      <div class="row"><span class="ok">✔</span><span>NZBGet</span><span class="what">Usenet klar</span></div>
+      <div class="row"><span class="ok">✔</span><span>Sonarr</span><span class="what">serier, koblet til Jellyfin</span></div>
+      <div class="row"><span class="ok">✔</span><span>Radarr</span><span class="what">filmer, koblet til Jellyfin</span></div>
+      <div class="row"><span class="ok">✔</span><span>Prowlarr</span><span class="what">indeksere til begge</span></div>
+      <div class="row"><span class="ok">✔</span><span>Bazarr</span><span class="what">norsk + engelsk</span></div>
+      <div class="row"><span class="ok">✔</span><span>Kvalitet</span><span class="what">bare 1080p eller bedre</span></div>
+      <div class="row"><span class="ok">✔</span><span>Seerr</span><span class="what">ønskeliste for familien</span></div>
+      <div class="row"><span class="ok">✔</span><span>Homepage</span><span class="what">dashboard på :3000</span></div>
+      <div class="done">Ferdig. Åpne <span>http://filmserver:3000</span></div>
+    </div>
+  </div>
+
+  <section id="steg">
+    <div class="wrap">
+      <h2>Tre steg, ingen innstillingssider</h2>
+      <p class="intro">Du svarer på noen spørsmål. Resten gjør oppsettet selv: mapper, innlogging, nedlastere, VPN, kvalitetsprofiler og koblingen til mediaserveren.</p>
+      <ol class="steps">
+        <li>
+          <h3>Pakk ut og start</h3>
+          <p>Last ned pakken for systemet ditt og start <code>start.sh</code>, <code>Start.command</code> eller <code>Start.bat</code>.</p>
+        </li>
+        <li>
+          <h3>Svar på spørsmålene</h3>
+          <p>Jellyfin eller Plex, hvor filmene ligger, et passord og en VPN-nøkkel. Det tar et par minutter.</p>
+        </li>
+        <li>
+          <h3>Alt kobles sammen</h3>
+          <p>Appene settes opp via API-ene sine, og du får en oppsummering. Du kan kjøre oppsettet igjen så ofte du vil.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="innhold">
+    <div class="wrap">
+      <h2>Det som følger med</h2>
+      <p class="intro">Alt kjører i Docker på én maskin. Tallet til venstre er porten du åpner i nettleseren, for eksempel <code style="font-family:var(--mono)">http://maskinen:3000</code>.</p>
+      <div class="guide">
+        <div class="ch feature"><span class="num">:3000</span><span class="name">Dashboard</span><span class="desc">Alle appene på én side, med køer, nedlastinger og hvem som ser hva.</span></div>
+        <div class="ch"><span class="num">:8096</span><span class="name">Jellyfin</span><span class="desc">Filmene og seriene dine på TV, mobil og nettleser. Gratis apper for Android, iPhone, Apple TV og smart-TV.</span></div>
+        <div class="ch"><span class="num">:32400</span><span class="name">Plex</span><span class="desc">Valgfritt i stedet for Jellyfin, hvis du heller vil bruke Plex.</span></div>
+        <div class="ch"><span class="num">:5055</span><span class="name">Seerr</span><span class="desc">Familie og venner ønsker seg filmer og serier. Resten skjer av seg selv.</span></div>
+        <div class="ch"><span class="num">:8989</span><span class="name">Sonarr</span><span class="desc">Følger med på seriene og henter nye episoder.</span></div>
+        <div class="ch"><span class="num">:7878</span><span class="name">Radarr</span><span class="desc">Det samme for filmer.</span></div>
+        <div class="ch"><span class="num">:9696</span><span class="name">Prowlarr</span><span class="desc">Ett sted for indeksere, delt med Sonarr og Radarr.</span></div>
+        <div class="ch"><span class="num">:8080</span><span class="name">qBittorrent</span><span class="desc">Torrent som bare går gjennom VPN. Faller VPN-en ut, stopper trafikken.</span></div>
+        <div class="ch"><span class="num">:6789</span><span class="name">NZBGet</span><span class="desc">Usenet, valgfritt. Newshosting er forhåndsutfylt.</span></div>
+        <div class="ch"><span class="num">:6767</span><span class="name">Bazarr</span><span class="desc">Henter undertekster på norsk og engelsk.</span></div>
+        <div class="ch"><span class="num">:9000</span><span class="name">Whisper</span><span class="desc">Valgfritt: AI lager undertekster fra lydsporet når ingen finnes på nett.</span></div>
+        <div class="ch"><span class="num">:8181</span><span class="name">Tautulli</span><span class="desc">Statistikk over hva som blir sett, når du bruker Plex. Jellyfin har dette innebygd.</span></div>
+        <div class="ch"><span class="num">:3010</span><span class="name">Kontrollpanel</span><span class="desc">Grønn, gul eller rød status med løsninger, og innstillinger for kvalitet, disk, fart, oppdateringer og indeksere. Retter trygge feil selv, og lager loggpakke til feilsøking.</span></div>
+        <div class="ch"><span class="num bg">bakgrunn</span><span class="name">Kvalitetsvakt</span><span class="desc">Bare 1080p eller bedre, med TRaSH Guides-profiler via Recyclarr.</span></div>
+        <div class="ch"><span class="num bg">bakgrunn</span><span class="name">Prefetcharr</span><span class="desc">Henter neste episoder mens du ser.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="last-ned">
+    <div class="wrap">
+      <h2>Last ned</h2>
+      <p class="intro">Velg pakken for maskinen som skal være server. Docker må være installert. På Linux tilbyr startskriptet å installere det for deg.</p>
+      <div class="dl">
+        <div class="os" data-os="linux">
+          <span class="you" hidden>Ditt system</span>
+          <h3>Linux</h3>
+          <p>Anbefalt. Jellyfin får maskinvare-transkoding gratis. Passer fint på en gammel bærbar eller en hjemmeserver.</p>
+          <span class="start">./start.sh</span>
+          <a class="btn dl-link" data-file="film-stack-linux.zip" href="#">Last ned for Linux</a>
+        </div>
+        <div class="os" data-os="macos">
+          <span class="you" hidden>Ditt system</span>
+          <h3>macOS</h3>
+          <p>macOS 14 eller nyere, med OrbStack eller Docker Desktop. Transkoding skjer med prosessoren.</p>
+          <span class="start">Dobbeltklikk Start.command</span>
+          <a class="btn dl-link" data-file="film-stack-macos.zip" href="#">Last ned for macOS</a>
+        </div>
+        <div class="os" data-os="windows">
+          <span class="you" hidden>Ditt system</span>
+          <h3>Windows</h3>
+          <p>Windows 10 eller 11, med Docker Desktop og WSL 2. Transkoding skjer med prosessoren.</p>
+          <span class="start">Dobbeltklikk Start.bat</span>
+          <a class="btn dl-link" data-file="film-stack-windows.zip" href="#">Last ned for Windows</a>
+        </div>
+      </div>
+      <p class="aside" style="margin-top:1.6rem">Eldre versjoner og endringslogg ligger under <a class="releases-link" href="#">Releases</a>. Kildekoden ligger på <a class="repo-link" href="#">GitHub</a>.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap two">
+      <div>
+        <h2>Det du gjør selv</h2>
+        <ul class="plain">
+          <li>Legg inn indeksere i Prowlarr. De deles automatisk med Sonarr og Radarr.</li>
+          <li>Velg undertekstkilder i Bazarr.</li>
+          <li>Lag brukere til familien i Jellyfin, eller inviter dem med Wizarr.</li>
+          <li>Har du Usenet, trenger du også en NZB-indekser.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Ansvar</h2>
+        <p class="aside">Film-stack setter opp programvare. Med Jellyfin er alt åpen kildekode. Du er selv ansvarlig for hva du laster ned, og for å følge lovene der du bor. All torrent-trafikk går gjennom VPN-en.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Film-stack er ikke tilknyttet Jellyfin eller Plex Inc. MIT-lisens.</span>
+    <span><a href="/">Alle prosjekter</a>&ensp;&ensp;<a class="repo-link" href="#">Kildekode</a>&ensp;&ensp;<a class="releases-link" href="#">Releases</a>&ensp;&ensp;<a href="en/" hreflang="en" lang="en">English</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Finner eier og forge fra adressen: brukernavn.github.io eller brukernavn.codeberg.page.
+  var doc = document.documentElement, repo = doc.getAttribute("data-repo"), en = doc.lang === "en";
+  var h = location.hostname, owner = null, forge = null;
+  if (/\.github\.io$/.test(h)) { owner = h.split(".")[0]; forge = "GitHub"; }
+  else if (/\.codeberg\.page$/.test(h)) { owner = h.split(".")[0]; forge = "Codeberg"; }
+  var base = owner ? (forge === "GitHub" ? "https://github.com/" : "https://codeberg.org/") + owner + "/" + repo : null;
+  function each(sel, fn) { document.querySelectorAll(sel).forEach(fn); }
+  each(".repo-link", function (a) { if (base) a.href = base; if (forge) a.textContent = a.textContent.replace("GitHub", forge); });
+  each(".releases-link", function (a) { if (base) a.href = base + "/releases"; if (forge) a.textContent = a.textContent.replace("GitHub", forge); });
+  each(".dl-link", function (a) {
+    if (base) a.href = forge === "GitHub" ? base + "/releases/latest/download/" + a.dataset.file : base + "/releases";
+  });
+
+  // Gjett operativsystem og fremhev riktig pakke.
+  var ua = navigator.userAgent, os = /Windows/i.test(ua) ? "windows" : /Mac OS X|Macintosh/i.test(ua) ? "macos" : /Linux|X11/i.test(ua) && !/Android/i.test(ua) ? "linux" : null;
+  var names = { linux: "for Linux", macos: "for macOS", windows: "for Windows" };
+  var card = os && document.querySelector('.os[data-os="' + os + '"]'), primary = document.getElementById("primary");
+  function syncPrimary() { if (card && base) primary.href = card.querySelector(".dl-link").href; }
+  if (card) {
+    card.classList.add("mine");
+    card.querySelector(".you").hidden = false;
+    card.parentNode.prepend(card);
+    document.getElementById("primary-os").textContent = names[os];
+    syncPrimary();
+  }
+
+  // Nyeste versjon, og direkte lenker til filene (stille hvis det ikke går).
+  if (owner && window.fetch) {
+    var api = forge === "GitHub" ? "https://api.github.com/repos/" + owner + "/" + repo + "/releases/latest"
+                                 : "https://codeberg.org/api/v1/repos/" + owner + "/" + repo + "/releases/latest";
+    fetch(api).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j) return;
+      if (j.tag_name) document.getElementById("ver").textContent = j.tag_name;
+      (j.assets || []).forEach(function (as) {
+        each('.dl-link[data-file="' + as.name + '"]', function (a) { a.href = as.browser_download_url; });
+      });
+      syncPrimary();
+    }).catch(function () {});
+  }
+
+  // Hakene i terminalen kommer én og én.
+  document.querySelectorAll(".term .row, .term .done").forEach(function (el, i) {
+    el.style.animationDelay = (0.35 + i * 0.16) + "s";
+  });
+})();
+</script>
+</body>
+</html>

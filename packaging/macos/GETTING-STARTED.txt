@@ -1,0 +1,24 @@
+FILM-STACK FOR macOS – GETTING STARTED
+======================================
+
+1. Install OrbStack (https://orbstack.dev) or Docker Desktop, and start it.
+
+2. Double-click Start.command in this folder.
+   The first time, macOS may say the file is from an unidentified developer:
+   right-click Start.command → Open → Open. (Only the first time.)
+   If it says the file can't be opened, run this in Terminal (in the folder):
+       chmod +x *.command
+
+3. The wizard asks a few questions, then everything is set up automatically.
+   The wizard is in Norwegian: "j" means yes, "n" means no. Press Enter to
+   accept the suggestion in [brackets]. README.en.md explains each question.
+
+4. Open the dashboard:  http://localhost:3000
+   Control panel (status, settings, logs):  http://localhost:3010
+   Jellyfin:            http://localhost:8096
+
+Update later: double-click Oppdater.command.
+
+Tip: turn off sleep (System Settings → Energy), and give OrbStack/Docker
+access to external disks under Privacy & Security → Files and Folders.
+Transcoding runs on the CPU on Mac.

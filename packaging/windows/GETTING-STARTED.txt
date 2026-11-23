@@ -1,0 +1,22 @@
+﻿FILM-STACK FOR WINDOWS – GETTING STARTED
+========================================
+
+1. Install Docker Desktop (https://www.docker.com/products/docker-desktop/)
+   with WSL 2, and start it.
+
+2. Unzip the file (right-click → Extract All), and double-click Start.bat.
+   If you see "Windows protected your PC": click "More info" → "Run anyway".
+
+3. The wizard asks a few questions, then everything is set up automatically.
+   The wizard is in Norwegian: "j" means yes, "n" means no. Press Enter to
+   accept the suggestion in [brackets]. README.en.md explains each question.
+   Write paths with forward slashes, for example D:/Media
+
+4. Open the dashboard:  http://localhost:3000
+   Control panel (status, settings, logs):  http://localhost:3010
+   Jellyfin:            http://localhost:8096
+
+Update later: double-click Oppdater.bat.
+
+Tip: turn off sleep, and let Docker Desktop start when you log in.
+Transcoding runs on the CPU on Windows.

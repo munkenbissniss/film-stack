@@ -1,0 +1,19 @@
+# Rolig modus: begrenser bakgrunnsapper så maskinen holder seg kjølig og stille.
+# Jellyfin og Plex begrenses ALDRI – avspilling og transkoding påvirkes ikke.
+# cpus: 1.0 = én prosessortråd. cpu_shares: taper alltid mot Plex ved travelhet.
+x-bg: &bg
+  cpu_shares: 256
+services:
+  sonarr:       {<<: *bg, cpus: 1.0}
+  radarr:       {<<: *bg, cpus: 1.0}
+  qbittorrent:  {<<: *bg, cpus: 1.0}
+  nzbget:       {<<: *bg, cpus: 1.0}
+  bazarr:       {<<: *bg, cpus: 0.5}
+  prowlarr:     {<<: *bg, cpus: 0.5}
+  flaresolverr: {<<: *bg, cpus: 0.5}
+  seerr:        {<<: *bg, cpus: 0.5}
+  tautulli:     {<<: *bg, cpus: 0.5}
+  recyclarr:    {<<: *bg, cpus: 0.5}
+  prefetcharr:  {<<: *bg, cpus: 0.25}
+  homepage:     {<<: *bg, cpus: 0.25}
+  whisper:      {<<: *bg, cpus: 2.0}    # AI-undertekster tar lengre tid, men maskinen holder seg rolig

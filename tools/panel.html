@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kontrollpanel · Film-stack</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='%234cc38a'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#14161a; --flate:#1b1e24; --flate2:#22262d; --linje:#2c313a; --tekst:#ebe8e2; --dempet:#9ca3ad;
+  --gronn:#4cc38a; --gul:#e8b54a; --rod:#f06a5f; --gra:#6b7280; --blaa:#7fa7f5;
+  --r:10px; --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--tekst);font:15px/1.5 var(--font);font-variant-numeric:tabular-nums}
+a{color:var(--blaa)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blaa);outline-offset:2px;border-radius:4px}
+
+/* toppen: én setning som sier hvordan det står til */
+.topp{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1.2rem;padding:1.1rem clamp(1rem,3vw,2rem);border-bottom:1px solid var(--linje)}
+.topp .navn{font-weight:600;color:var(--dempet)}
+.helse{display:flex;align-items:center;gap:.6rem;font-size:1.35rem;font-weight:650;letter-spacing:-.01em}
+.helse .prikk{width:14px;height:14px}
+.topp .tid{color:var(--dempet);font-size:.9rem}
+.topp .hoyre{margin-left:auto;display:flex;gap:.5rem;align-items:center}
+
+.oppsett{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 66px)}
+nav{border-right:1px solid var(--linje);padding:1rem .6rem}
+nav a{display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;border-radius:8px;color:var(--dempet);text-decoration:none}
+nav a:hover{background:var(--flate);color:var(--tekst)}
+nav a[aria-current]{background:var(--flate2);color:var(--tekst);font-weight:600}
+nav a .prikk{margin-left:auto}
+main{padding:1.4rem clamp(1rem,3vw,2.2rem) 4rem;max-width:960px}
+section{display:none}
+section.vis{display:block}
+h1{font-size:1.4rem;margin:0 0 .3rem;letter-spacing:-.01em}
+h2{font-size:1rem;margin:1.8rem 0 .6rem;color:var(--dempet);font-weight:600}
+.ingress{color:var(--dempet);margin:0 0 1.2rem;max-width:62ch}
+
+.prikk{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none;background:var(--gra)}
+.grønn{background:var(--gronn)} .gul{background:var(--gul)} .rød{background:var(--rod)} .grå{background:var(--gra)}
+
+/* funn */
+.funn{display:grid;gap:.6rem}
+.sak{display:grid;grid-template-columns:auto 1fr auto;gap:.3rem .9rem;align-items:start;background:var(--flate);
+  border:1px solid var(--linje);border-left:4px solid var(--gra);border-radius:var(--r);padding:.85rem 1rem}
+.sak.rød{border-left-color:var(--rod);background:var(--flate)} .sak.gul{border-left-color:var(--gul);background:var(--flate)}
+.sak .prikk{margin-top:.45rem}
+.sak .gruppe{font-size:.82rem;color:var(--dempet)}
+.sak .tekst{font-weight:600}
+.sak .rad{color:var(--dempet);font-size:.92rem;margin-top:.15rem}
+.sak .auto{font-size:.85rem;color:var(--dempet);margin-top:.3rem}
+.sak .handling{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end}
+details.ok{background:var(--flate);border:1px solid var(--linje);border-radius:var(--r);padding:.7rem 1rem}
+details.ok summary{cursor:pointer;display:flex;align-items:center;gap:.6rem;font-weight:600}
+details.ok ul{list-style:none;margin:.6rem 0 0;padding:0;columns:2 280px;column-gap:1.5rem}
+details.ok li{display:flex;gap:.5rem;align-items:baseline;padding:.2rem 0;break-inside:avoid;font-size:.92rem}
+details.ok li .prikk{width:7px;height:7px;transform:translateY(-1px)}
+details.ok li b{font-weight:500;color:var(--dempet);min-width:6.5rem}
+
+/* skjemaer og kort */
+.kort{background:var(--flate);border:1px solid var(--linje);border-radius:var(--r);padding:1.1rem 1.2rem;margin-bottom:1rem}
+.rad2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem}
+label{display:block;font-size:.88rem;color:var(--dempet);margin-bottom:.3rem}
+input[type=number],input[type=time],select{width:100%;background:var(--bg);border:1px solid var(--linje);border-radius:8px;padding:.55rem .7rem}
+input[type=number]{max-width:12rem}
+.hint{font-size:.85rem;color:var(--dempet);margin:.4rem 0 0}
+.valg{display:flex;flex-wrap:wrap;gap:.5rem}
+.valg label{display:flex;align-items:center;gap:.5rem;margin:0;padding:.6rem .9rem;border:1px solid var(--linje);border-radius:8px;
+  background:var(--bg);color:var(--tekst);cursor:pointer;font-size:.95rem}
+.valg input{accent-color:var(--blaa)}
+.valg label:has(input:checked){border-color:var(--blaa);background:#1d2635}
+.bryter{display:flex;align-items:center;gap:.6rem;color:var(--tekst);font-size:.95rem;margin:.8rem 0 0}
+.bryter input{width:18px;height:18px;accent-color:var(--blaa)}
+.knapper{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem;align-items:center}
+.knapp{border:1px solid var(--linje);background:var(--flate2);border-radius:8px;padding:.5rem .9rem;cursor:pointer;text-decoration:none;color:var(--tekst);display:inline-block;font-size:.92rem;white-space:nowrap}
+.knapp:hover{border-color:#3d4450}
+.knapp.hoved{background:var(--blaa);border-color:var(--blaa);color:#0f1420;font-weight:600}
+.knapp.fare{border-color:#5b2f2c;color:#ffb3ab}
+.knapp[disabled]{opacity:.5;cursor:default}
+.melding{font-size:.9rem;color:var(--dempet)}
+
+/* tall */
+.tall{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem}
+.tall div{background:var(--flate);border:1px solid var(--linje);border-radius:var(--r);padding:.9rem 1rem}
+.tall b{display:block;font-size:1.6rem;font-weight:650;letter-spacing:-.02em}
+.tall span{font-size:.85rem;color:var(--dempet)}
+.maler{height:10px;border-radius:5px;background:var(--flate2);overflow:hidden;margin:.6rem 0 .3rem}
+.maler i{display:block;height:100%;background:var(--gronn)}
+
+/* lister */
+.liste{width:100%;border-collapse:collapse;font-size:.93rem}
+.liste th{text-align:left;font-weight:500;color:var(--dempet);font-size:.82rem;padding:.4rem .6rem;border-bottom:1px solid var(--linje)}
+.liste td{padding:.6rem;border-bottom:1px solid var(--linje);vertical-align:middle}
+.liste td.tall2{text-align:right;color:var(--dempet)}
+.liste .navn{display:flex;align-items:center;gap:.55rem;font-weight:600}
+.liste .under{font-size:.82rem;color:var(--dempet);font-weight:400}
+.hendelser{list-style:none;padding:0;margin:0}
+.hendelser li{display:grid;grid-template-columns:7.5rem 1fr;gap:.8rem;padding:.45rem 0;border-bottom:1px solid var(--linje);font-size:.92rem}
+.hendelser time{color:var(--dempet)}
+.hendelser .auto{color:var(--gronn)}
+pre{background:var(--bg);border:1px solid var(--linje);border-radius:8px;padding:.8rem;overflow:auto;font-size:.82rem;max-height:240px;white-space:pre-wrap}
+
+.toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);background:#2a303a;border:1px solid #3a414d;padding:.7rem 1.1rem;
+  border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4);max-width:min(92vw,560px);display:none;z-index:9}
+.toast.vis{display:block}
+.toast.feil{border-color:#6b2f2b}
+
+@media (max-width:760px){
+  .oppsett{grid-template-columns:1fr}
+  nav{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--linje);padding:.5rem;gap:.2rem;position:sticky;top:0;background:var(--bg);z-index:5}
+  nav a{white-space:nowrap;padding:.45rem .7rem}
+  nav a .prikk{margin-left:0;order:-1}
+  .sak{grid-template-columns:auto 1fr}
+  .sak .handling{grid-column:2;justify-content:flex-start}
+  .hendelser li{grid-template-columns:1fr;gap:0}
+  .liste .skjul{display:none}
+  .topp .hoyre{margin-left:0}
+}
+@media (prefers-reduced-motion:no-preference){.knapp,.valg label{transition:border-color .12s,background .12s}}
+</style>
+</head>
+<body>
+<header class="topp">
+  <span class="navn" id="stacknavn">Film-stack</span>
+  <span class="helse" id="helse"><span class="prikk"></span><span>Henter status …</span></span>
+  <span class="tid" id="sjekket"></span>
+  <span class="hoyre"><button class="knapp" id="sjekknaa">Sjekk nå</button><a class="knapp" id="dashlenke" href="#">Dashboard</a></span>
+</header>
+<div class="oppsett">
+<nav aria-label="Seksjoner">
+  <a href="#oversikt">Oversikt <span class="prikk" data-sek="oversikt"></span></a>
+  <a href="#kvalitet">Kvalitet</a>
+  <a href="#disk">Disk <span class="prikk" data-sek="disk"></span></a>
+  <a href="#fart">Fart</a>
+  <a href="#oppdateringer">Oppdateringer <span class="prikk" data-sek="oppdateringer"></span></a>
+  <a href="#indeksere">Indeksere <span class="prikk" data-sek="indeksere"></span></a>
+  <a href="#kjoling">Kjøling <span class="prikk" data-sek="kjoling"></span></a>
+  <a href="#feilsoking">Feilsøking <span class="prikk" data-sek="feilsoking"></span></a>
+</nav>
+<main>
+
+<section id="oversikt">
+  <h1>Oversikt</h1>
+  <p class="ingress">Panelet sjekker hele stacken hvert kvarter. Røde feil som er trygge å rette, rettes av seg selv. Resten får en knapp.</p>
+  <div class="funn" id="funn"></div>
+  <label class="bryter"><input type="checkbox" id="automatikk"> Rett trygge feil automatisk (starte apper på nytt, stoppe qBittorrent ved VPN-lekkasje)</label>
+  <h2>Hendelser</h2>
+  <ul class="hendelser" id="hendelser"></ul>
+</section>
+
+<section id="kvalitet">
+  <h1>Kvalitet</h1>
+  <p class="ingress">Laveste oppløsning Sonarr og Radarr får hente. Kvalitetsvakten sjekker hvert kvarter, fordi Recyclarr skriver tilbake guidens profiler hver natt.</p>
+  <form class="kort" data-seksjon="kvalitet">
+    <div class="valg">
+      <label><input type="radio" name="min_opplosning" value="720"> 720p og bedre</label>
+      <label><input type="radio" name="min_opplosning" value="1080"> 1080p og bedre</label>
+      <label><input type="radio" name="min_opplosning" value="2160"> Bare 4K</label>
+    </div>
+    <p class="hint">Bare 4K gir færre treff og mye større filer. 1080p passer de fleste TV-er.</p>
+    <div class="knapper"><button class="knapp hoved">Lagre og bruk nå</button><span class="melding"></span></div>
+  </form>
+  <div id="kvalitetsresultat"></div>
+</section>
+
+<section id="disk">
+  <h1>Disk</h1>
+  <p class="ingress">Mediemappa der filmer, serier og nedlastinger ligger.</p>
+  <div class="kort" id="diskinfo"></div>
+  <form class="kort" data-seksjon="disk">
+    <div class="rad2">
+      <div><label for="varsel_gb">Varsle når det er mindre enn (GB)</label><input type="number" id="varsel_gb" name="varsel_gb" min="1"></div>
+      <div><label for="pause_gb">Pause nedlastinger under (GB)</label><input type="number" id="pause_gb" name="pause_gb" min="1"></div>
+    </div>
+    <p class="hint">Under pausegrensen stoppes qBittorrent og NZBGet av seg selv, og de fortsetter når det er 5 GB mer ledig. Da blir disken aldri helt full.</p>
+    <div class="knapper"><button class="knapp hoved">Lagre</button><span class="melding"></span></div>
+  </form>
+</section>
+
+<section id="fart">
+  <h1>Fart</h1>
+  <p class="ingress">Hvor mye av nettlinja nedlastingene får bruke. 0 betyr ubegrenset.</p>
+  <form class="kort" data-seksjon="fart">
+    <h2 style="margin-top:0">Vanlig</h2>
+    <div class="rad2">
+      <div><label for="ned_mb">Ned (MB/s)</label><input type="number" step="0.1" min="0" id="ned_mb" name="ned_mb"></div>
+      <div><label for="opp_mb">Opp (MB/s, bare torrent)</label><input type="number" step="0.1" min="0" id="opp_mb" name="opp_mb"></div>
+    </div>
+    <h2>Rolig</h2>
+    <div class="rad2">
+      <div><label for="rolig_ned_mb">Ned (MB/s)</label><input type="number" step="0.1" min="0" id="rolig_ned_mb" name="rolig_ned_mb"></div>
+      <div><label for="rolig_opp_mb">Opp (MB/s, bare torrent)</label><input type="number" step="0.1" min="0" id="rolig_opp_mb" name="rolig_opp_mb"></div>
+    </div>
+    <p class="hint">Rolige grenser brukes når kjølingen roer ned maskinen, og i tidsrommet under hvis du slår det på.</p>
+    <label class="bryter"><input type="checkbox" name="plan" id="plan"> Bruk rolige grenser hver dag i et tidsrom (f.eks. når familien bruker nettet)</label>
+    <div class="rad2" style="margin-top:.8rem">
+      <div><label for="plan_fra">Fra</label><input type="time" id="plan_fra" name="plan_fra"></div>
+      <div><label for="plan_til">Til</label><input type="time" id="plan_til" name="plan_til"></div>
+    </div>
+    <div class="knapper"><button class="knapp hoved">Lagre og bruk nå</button><span class="melding"></span></div>
+  </form>
+</section>
+
+<section id="oppdateringer">
+  <h1>Oppdateringer</h1>
+  <p class="ingress">Henter nye versjoner av alle appene og starter dem på nytt. Innstillinger og bibliotek beholdes. Sjekken kjøres etterpå, så du ser om noe gikk i stykker.</p>
+  <div class="kort" id="oppdstatus"></div>
+  <form class="kort" data-seksjon="oppdatering">
+    <div class="valg">
+      <label><input type="radio" name="modus" value="av"> Av</label>
+      <label><input type="radio" name="modus" value="daglig"> Hver natt</label>
+      <label><input type="radio" name="modus" value="ukentlig"> Én gang i uka</label>
+    </div>
+    <div class="rad2" style="margin-top:1rem">
+      <div><label for="dag">Dag</label><select id="dag" name="dag">
+        <option value="0">mandag</option><option value="1">tirsdag</option><option value="2">onsdag</option><option value="3">torsdag</option>
+        <option value="4">fredag</option><option value="5">lørdag</option><option value="6">søndag</option></select></div>
+      <div><label for="klokke">Klokkeslett</label><input type="time" id="klokke" name="klokke"></div>
+    </div>
+    <label class="bryter"><input type="checkbox" name="vent_paa_avspilling" id="vent_paa_avspilling"> Vent hvis noen ser på noe</label>
+    <div class="knapper"><button class="knapp hoved">Lagre</button><span class="melding"></span></div>
+  </form>
+</section>
+
+<section id="indeksere">
+  <h1>Indeksere</h1>
+  <p class="ingress">Stedene Prowlarr søker etter filmer og serier. Feiler en for ofte, setter Prowlarr den på pause en stund av seg selv.</p>
+  <div class="kort" id="indeksliste"><p class="melding">Henter fra Prowlarr …</p></div>
+</section>
+
+<section id="kjoling">
+  <h1>Kjøling</h1>
+  <p class="ingress">Roer ned bakgrunnsappene når maskinen blir varm eller travel. Mediaserveren begrenses aldri.</p>
+  <div class="tall" id="kjoletall"></div>
+  <div class="kort" style="margin-top:1rem">
+    <div class="valg" id="kjolemodus">
+      <label><input type="radio" name="kmodus" value="auto"> Automatisk</label>
+      <label><input type="radio" name="kmodus" value="calm"> Alltid rolig</label>
+      <label><input type="radio" name="kmodus" value="normal"> Aldri rolig</label>
+    </div>
+    <p class="hint" id="kjolehint"></p>
+  </div>
+</section>
+
+<section id="feilsoking">
+  <h1>Feilsøking</h1>
+  <p class="ingress">Når noe er rart: slå på debug, gjenta det som feiler, og last ned loggene.</p>
+  <div class="kort">
+    <h2 style="margin-top:0">Debug-logging</h2>
+    <p id="debugstatus" class="melding"></p>
+    <div class="knapper"><button class="knapp hoved" id="debugknapp">Slå på i 24 timer</button></div>
+    <p class="hint">Sonarr, Radarr, Prowlarr, Bazarr og mediaserveren skriver mye mer. Slås av automatisk etter 24 timer, så loggene ikke fyller disken.</p>
+  </div>
+  <div class="kort">
+    <h2 style="margin-top:0">Loggpakke</h2>
+    <p class="melding">En zip med det alle tjenestene har skrevet, appenes loggfiler, siste sjekk og maskininfo. Passord, API-nøkler, token, e-postadresser og offentlige IP-adresser er sladdet.</p>
+    <div class="knapper"><a class="knapp hoved" href="/api/logger.zip" id="loggknapp">Last ned logger</a></div>
+  </div>
+  <div class="kort">
+    <h2 style="margin-top:0">Autooppsettet</h2>
+    <p class="melding">Kobler alle appene sammen igjen. Trygt å kjøre så ofte du vil.</p>
+    <div class="knapper"><button class="knapp" data-fiks="autoconfig">Kjør autooppsettet</button></div>
+  </div>
+</section>
+
+</main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S = null, skjemaerFylt = false, indeksHentet = 0, indeksNiva = "";
+
+function toast(tekst, feil = false) {
+  const t = $("#toast"); t.textContent = tekst; t.className = "toast vis" + (feil ? " feil" : "");
+  clearTimeout(t._h); t._h = setTimeout(() => t.className = "toast", 5000);
+}
+async function api(sti, data) {
+  const r = await fetch(sti, data === undefined ? {} : {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data)});
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok && !j.melding) j.melding = `Feil ${r.status}`;
+  j.ok = r.ok && j.ok !== false; return j;
+}
+function siden(ts) {
+  if (!ts) return "aldri";
+  const m = Math.round((Date.now() / 1000 - ts) / 60);
+  return m < 1 ? "nå nettopp" : m < 60 ? `for ${m} min siden` : m < 1440 ? `for ${Math.round(m / 60)} t siden` : new Date(ts * 1000).toLocaleDateString("nb-NO");
+}
+const klokke = ts => new Date(ts * 1000).toLocaleString("nb-NO", {weekday: "short", hour: "2-digit", minute: "2-digit"});
+const prikk = n => `<span class="prikk ${n}"></span>`;
+
+// ---------------------------------------------------------------- navigasjon
+function visSeksjon() {
+  const id = (location.hash || "#oversikt").slice(1);
+  $$("section").forEach(s => s.classList.toggle("vis", s.id === id));
+  $$("nav a").forEach(a => a.toggleAttribute("aria-current", a.getAttribute("href") === "#" + id));
+  if (!$("section.vis")) { $("#oversikt").classList.add("vis"); }
+  if (id === "indeksere") hentIndeksere();
+}
+addEventListener("hashchange", visSeksjon);
+
+// ---------------------------------------------------------------- tegning
+function tegn() {
+  const rader = S.funn || [];
+  const rod = rader.filter(r => r.niva === "rød"), gul = rader.filter(r => r.niva === "gul"), gronn = rader.filter(r => r.niva === "grønn");
+  const niva = !rader.length ? "grå" : rod.length ? "rød" : gul.length ? "gul" : "grønn";
+  $("#helse").innerHTML = prikk(niva) + `<span>${esc(S.oppsummering)}</span>`;
+  $("#sjekket").textContent = S.sjekker ? "Sjekker nå …" : "Sjekket " + siden(S.sjekket);
+  $("#stacknavn").textContent = `Film-stack ${S.versjon || ""}`.trim();
+  $("#dashlenke").href = S.lenker.dashboard;
+  document.title = `${S.oppsummering} · Kontrollpanel`;
+
+  const saker = [...rod, ...gul].map(r => {
+    const f = r.fiks;
+    let handling = "", auto = "";
+    if (f && f.id === "vis:disk") handling = `<a class="knapp" href="#disk">${esc(f.navn)}</a>`;
+    else if (f) handling = `<button class="knapp ${r.niva === "rød" ? "hoved" : ""}" data-fiks="${esc(f.id)}">${esc(f.navn)}</button>`;
+    if (r.lenke) handling += `<a class="knapp" href="${esc(r.lenke)}" target="_blank" rel="noopener">Les mer</a>`;
+    if (f && f.forklaring) auto = `<div class="auto">${esc(f.forklaring)}</div>`;
+    else if (f && f.auto && S.innstillinger.automatikk) auto = `<div class="auto">Rettes automatisk ved neste sjekk.</div>`;
+    return `<div class="sak ${r.niva}">${prikk(r.niva)}<div><div class="gruppe">${esc(r.gruppe)}</div>
+      <div class="tekst">${esc(r.tekst)}</div>${r.rad ? `<div class="rad">${esc(r.rad)}</div>` : ""}${auto}</div>
+      <div class="handling">${handling}</div></div>`;
+  }).join("");
+  const ok = gronn.length ? `<details class="ok"${!rod.length && !gul.length ? " open" : ""}><summary>${prikk("grønn")} ${gronn.length} ting virker</summary><ul>${
+    gronn.map(r => `<li>${prikk("grønn")}<b>${esc(r.gruppe)}</b><span>${esc(r.tekst)}</span></li>`).join("")}</ul></details>` : "";
+  $("#funn").innerHTML = saker + ok || `<p class="melding">Første sjekk kjører. Det tar et halvt til et par minutter.</p>`;
+  $("#automatikk").checked = !!S.innstillinger.automatikk;
+
+  $("#hendelser").innerHTML = (S.hendelser || []).slice(0, 25).map(h =>
+    `<li><time>${klokke(h.tid)}</time><span class="${h.type === "auto" ? "auto" : ""}">${esc(h.tekst)}</span></li>`).join("")
+    || `<li><span class="melding">Ingenting ennå.</span></li>`;
+
+  // prikker i menyen
+  const grp = g => rader.filter(r => r.gruppe === g);
+  const verst = rs => rs.some(r => r.niva === "rød") ? "rød" : rs.some(r => r.niva === "gul") ? "gul" : rs.length ? "grønn" : "";
+  const sek = {oversikt: niva, disk: S.disk.pauset ? "rød" : verst(grp("Disk")), indeksere: indeksNiva || verst(grp("Prowlarr")),
+    oppdateringer: S.oppdatering.resultat === "feil" ? "rød" : S.oppdatering.kjorer ? "gul" : "",
+    kjoling: S.kjoling.status === "Rolig" ? "gul" : "", feilsoking: S.debug.pa ? "gul" : ""};
+  $$("nav .prikk").forEach(p => { p.className = "prikk " + (sek[p.dataset.sek] || ""); p.style.visibility = sek[p.dataset.sek] ? "" : "hidden"; });
+
+  // disk
+  const d = S.disk.data || {};
+  $("#diskinfo").innerHTML = d.feil ? `<p>${prikk("rød")} Får ikke lest mediemappa: ${esc(d.feil)}</p>` :
+    `<div class="tall" style="margin-bottom:.4rem"><div><b>${d.ledig_gb} GB</b><span>ledig</span></div><div><b>${d.total_gb} GB</b><span>totalt</span></div>
+     <div><b style="font-size:1.1rem;line-height:1.3;padding:.35rem 0">${esc(S.disk.type)}</b><span>${S.disk.kilde ? esc(S.disk.kilde) : "hvor mediemappa ligger"}</span></div></div>
+     <div class="maler" aria-label="${d.brukt_prosent} % brukt"><i style="width:${d.brukt_prosent}%;background:var(${d.ledig_gb < S.innstillinger.disk.pause_gb ? "--rod" : d.ledig_gb < S.innstillinger.disk.varsel_gb ? "--gul" : "--gronn"})"></i></div>
+     <p class="hint">${d.brukt_prosent} % brukt.${S.disk.pauset ? ` <strong style="color:var(--rod)">Nedlastingene er satt på pause fordi disken nesten er full.</strong>` : ""}</p>
+     ${grp("Disk").filter(r => !/GB ledig/.test(r.tekst)).map(r => `<p class="hint">${prikk(r.niva)} ${esc(r.tekst)}${r.rad && r.niva !== "grønn" ? " – " + esc(r.rad) : ""}</p>`).join("")}`;
+
+  // oppdateringer
+  const u = S.oppdatering;
+  $("#oppdstatus").innerHTML = `<p>${prikk(u.kjorer ? "gul" : u.resultat === "feil" ? "rød" : u.resultat === "ok" ? "grønn" : "grå")}
+    ${u.kjorer ? "Oppdaterer nå …" : u.siste ? `Sist oppdatert ${siden(u.siste)}${u.resultat === "feil" ? ", men det feilet" : ""}.` : "Ikke oppdatert fra panelet ennå."}
+    ${esc(u.plan)}.</p>
+    ${u.mulig ? "" : `<p class="hint">${prikk("gul")} Kan ikke oppdatere herfra: ${esc(u.hvorfor)}.</p>`}
+    ${u.resultat === "feil" && u.logg ? `<pre>${esc(u.logg)}</pre>` : ""}
+    <div class="knapper"><button class="knapp" id="oppdaternaa" ${u.kjorer || !u.mulig ? "disabled" : ""}>Oppdater nå</button></div>`;
+
+  // kvalitet
+  const kv = S.kvalitet && S.kvalitet.apper;
+  $("#kvalitetsresultat").innerHTML = kv ? `<div class="kort"><p class="melding">Sist brukt ${siden(S.kvalitet.tid)}:</p>${
+    Object.entries(kv).map(([a, v]) => `<p>${prikk("grønn")} ${esc(a)}: hovedprofil «${esc(v.hovedprofil)}», ${v.strammet} strammet inn, ${v.fjernet} fjernet, ${v.flyttet} flyttet</p>`).join("")}</div>` : "";
+
+  // kjøling
+  const k = S.kjoling, f = (v, e) => v == null ? "–" : `${Math.round(v)} ${e}`;
+  $("#kjoletall").innerHTML = `<div><b style="color:var(${k.status === "Rolig" ? "--gul" : "--gronn"})">${esc(k.status)}</b><span>${esc(k.grunn)} · ${esc(k.siden)}</span></div>
+    <div><b>${f(k.temp, "°C")}</b><span>temperatur</span></div><div><b>${f(k.cpu, "%")}</b><span>prosessor</span></div><div><b>${f(k.mem, "%")}</b><span>minne</span></div>`;
+  $$("#kjolemodus input").forEach(i => i.checked = i.value === k.modus_id);
+  $("#kjolehint").textContent = `Automatisk: rolig over ${k.grenser.varm} °C eller over ${k.grenser.travel} % prosessor i 2 minutter, normal igjen under ${k.grenser.rolig_under} °C og ${k.grenser.rolig_last} % i 5 minutter.`;
+
+  // debug
+  const db = S.debug, res = Object.entries(db.resultat || {});
+  $("#debugstatus").innerHTML = db.pa ? `${prikk("gul")} På til ${klokke(db.til)}. ${res.map(([a, ok]) => `${esc(a)} ${ok ? "✔" : "✘"}`).join(" · ")}` : `${prikk("grønn")} Av. Appene logger som vanlig.`;
+  $("#debugknapp").textContent = db.pa ? "Slå av nå" : "Slå på i 24 timer";
+  $("#debugknapp").dataset.pa = db.pa ? "" : "1";
+
+  if (!skjemaerFylt) fyllSkjemaer();
+}
+
+function fyllSkjemaer() {
+  skjemaerFylt = true;
+  const s = S.innstillinger;
+  $$(`[data-seksjon=kvalitet] input[name=min_opplosning]`).forEach(i => i.checked = +i.value === +s.kvalitet.min_opplosning);
+  for (const [k, v] of Object.entries(s.disk)) { const el = $(`[data-seksjon=disk] [name=${k}]`); if (el) el.value = v; }
+  for (const [k, v] of Object.entries(s.fart)) { const el = $(`[data-seksjon=fart] [name=${k}]`); if (el) el.type === "checkbox" ? el.checked = v : el.value = v; }
+  $$(`[data-seksjon=oppdatering] input[name=modus]`).forEach(i => i.checked = i.value === s.oppdatering.modus);
+  $("#dag").value = s.oppdatering.dag; $("#klokke").value = s.oppdatering.klokke;
+  $("#vent_paa_avspilling").checked = !!s.oppdatering.vent_paa_avspilling;
+  const h = $$(`[data-seksjon=fart] .hint`)[0];
+  h.textContent = "Rolige grenser brukes når kjølingen roer ned maskinen, og i tidsrommet under hvis du slår det på." + (S.usenet ? "" : " NZBGet er ikke i bruk, så bare qBittorrent påvirkes.");
+}
+
+// ---------------------------------------------------------------- indeksere
+async function hentIndeksere(tving) {
+  if (!tving && Date.now() - indeksHentet < 30000) return;
+  indeksHentet = Date.now();
+  const j = await api("/api/indeksere");
+  const el = $("#indeksliste"), lenke = S ? S.lenker.prowlarr : "#";
+  const dott = $(`nav .prikk[data-sek=indeksere]`);
+  const sett = n => { if (dott) { dott.className = "prikk " + n; dott.style.visibility = n ? "" : "hidden"; } };
+  if (j.feil) { sett("rød"); el.innerHTML = `<p>${prikk("rød")} ${esc(j.feil)}</p>`; return; }
+  const ls = j.liste || [];
+  sett(ls.some(i => i.niva === "rød") ? "rød" : ls.some(i => i.niva === "gul") || !ls.length ? "gul" : "grønn");
+  indeksNiva = ls.some(i => i.niva === "rød") ? "rød" : ls.some(i => i.niva === "gul") || !ls.length ? "gul" : "grønn";
+  if (!j.liste.length) { el.innerHTML = `<p>${prikk("gul")} Ingen indeksere ennå, så ingenting kan søkes opp.</p>
+    <div class="knapper"><a class="knapp hoved" href="${esc(lenke)}/add/indexer" target="_blank" rel="noopener">Legg til i Prowlarr</a></div>`; return; }
+  el.innerHTML = `<table class="liste"><thead><tr><th>Indekser</th><th class="skjul">Søk</th><th class="skjul">Feil</th><th class="skjul">Hentet</th><th class="skjul">Svartid</th><th></th></tr></thead><tbody>${
+    j.liste.map(i => `<tr><td><div class="navn">${prikk(i.niva)}${esc(i.navn)}</div><div class="under">${esc(i.tekst)} · ${esc(i.type)}${i.privat === "private" ? " · privat" : ""}</div></td>
+      <td class="tall2 skjul">${i.sok}</td><td class="tall2 skjul">${i.feil}</td><td class="tall2 skjul">${i.hentet}</td>
+      <td class="tall2 skjul">${i.svartid_ms != null ? i.svartid_ms + " ms" : "–"}</td>
+      <td><div class="knapper" style="margin:0;justify-content:flex-end"><button class="knapp" data-ix="${i.id}/test">Test</button>
+      <button class="knapp" data-ix="${i.id}/${i.pa ? "av" : "pa"}">${i.pa ? "Slå av" : "Slå på"}</button></div></td></tr>`).join("")}</tbody></table>
+    <div class="knapper"><a class="knapp" href="${esc(lenke)}" target="_blank" rel="noopener">Åpne Prowlarr</a><span class="melding">Nye indeksere legges til i Prowlarr og synkes til Sonarr og Radarr av seg selv.</span></div>`;
+}
+
+// ---------------------------------------------------------------- handlinger
+document.addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.fiks) {
+    b.disabled = true; const j = await api("/api/fiks", {id: b.dataset.fiks}); b.disabled = false;
+    toast(j.melding || (j.ok ? "Gjort" : "Feilet"), !j.ok); hent();
+  } else if (b.dataset.ix) {
+    b.disabled = true; const j = await api("/api/indeksere/" + b.dataset.ix, {}); b.disabled = false;
+    toast(j.melding, !j.ok); hentIndeksere(true);
+  } else if (b.id === "sjekknaa") {
+    const j = await api("/api/sjekk", {}); toast(j.melding); setTimeout(hent, 1500);
+  } else if (b.id === "oppdaternaa") {
+    if (!confirmBox(b, "Sikker? Appene startes på nytt.")) return;
+    const j = await api("/api/oppdater", {}); toast(j.melding, !j.ok); hent();
+  } else if (b.id === "debugknapp") {
+    const pa = !!b.dataset.pa; b.disabled = true;
+    const j = await api("/api/debug", {pa}); b.disabled = false;
+    const bad = Object.entries(j.resultat || {}).filter(([, v]) => !v).map(([k]) => k);
+    toast(`Debug ${pa ? "på" : "av"}` + (bad.length ? `. Fikk ikke til: ${bad.join(", ")}` : ""), bad.length > 0); hent();
+  }
+});
+// to-trinns bekreftelse uten dialogbokser
+function confirmBox(b, tekst) {
+  if (b.dataset.bekreft) { delete b.dataset.bekreft; return true; }
+  b.dataset.bekreft = "1"; const gammel = b.textContent; b.textContent = tekst;
+  setTimeout(() => { if (b.dataset.bekreft) { delete b.dataset.bekreft; b.textContent = gammel; } }, 5000);
+  return false;
+}
+document.addEventListener("submit", async e => {
+  e.preventDefault();
+  const form = e.target, data = {};
+  for (const el of form.elements) {
+    if (!el.name) continue;
+    if (el.type === "checkbox") data[el.name] = el.checked;
+    else if (el.type === "radio") { if (el.checked) data[el.name] = el.value; }
+    else data[el.name] = el.value;
+  }
+  const knapp = $("button", form), msg = $(".melding", form);
+  knapp.disabled = true; msg.textContent = "Lagrer …";
+  const j = await api("/api/innstillinger/" + form.dataset.seksjon, data);
+  knapp.disabled = false; msg.textContent = j.melding || ""; toast(j.melding, !j.ok);
+  skjemaerFylt = false; hent();
+});
+$("#automatikk").addEventListener("change", async e => {
+  const j = await api("/api/innstillinger/automatikk", {pa: e.target.checked}); toast(j.melding, !j.ok); hent();
+});
+$("#kjolemodus").addEventListener("change", async e => {
+  await api("/api/kjoling", {modus: e.target.value}); toast("Kjøling: " + e.target.parentElement.textContent.trim()); hent();
+});
+
+async function hent() {
+  try {
+    const r = await fetch("/api/panel"); if (!r.ok) throw new Error(r.status);
+    S = await r.json(); tegn();
+  } catch (e) { $("#helse").innerHTML = prikk("rød") + "<span>Får ikke kontakt med panelet</span>"; }
+}
+visSeksjon(); hent().then(() => hentIndeksere()); setInterval(hent, 20000);
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+title: Film og serier
+theme: dark
+color: slate
+headerStyle: boxed
+statusStyle: dot
+layout:
+  Se på:
+    style: row
+    columns: 4
+  Bibliotek:
+    style: row
+    columns: 4
+  Nedlasting:
+    style: row
+    columns: 4
+  Vedlikehold:
+    style: row
+    columns: 3

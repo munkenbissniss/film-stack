@@ -1,0 +1,22 @@
+FILM-STACK FOR macOS – KOM I GANG
+=================================
+
+Krever macOS 14 (Sonoma) eller nyere.
+
+1. Installer OrbStack (https://orbstack.dev) eller Docker Desktop, og start det.
+
+2. Dobbeltklikk Start.command i denne mappa.
+   Første gang kan macOS si at fila er fra en ukjent utvikler:
+   høyreklikk Start.command → Åpne → Åpne. (Bare første gang.)
+
+   Veiviseren starter, og etterpå settes alle appene opp automatisk.
+
+3. Åpne dashboardet:  http://localhost:3000
+   Kontrollpanel (status, innstillinger, logger):  http://localhost:3010
+   Jellyfin:            http://localhost:8096
+
+Oppdatere senere: dobbeltklikk Oppdater.command.
+
+Tips: skru av dvale (Systeminnstillinger → Strøm), og gi OrbStack/Docker
+tilgang til eksterne disker under Personvern og sikkerhet → Filer og mapper.
+Transkoding skjer med prosessoren på Mac. Alt står i README.md.

@@ -1,0 +1,22 @@
+﻿FILM-STACK FOR WINDOWS – KOM I GANG
+===================================
+
+Krever Windows 10 eller 11.
+
+1. Installer Docker Desktop (https://www.docker.com/products/docker-desktop/)
+   med WSL 2, og start det.
+
+2. Pakk ut zip-fila (høyreklikk → Pakk ut alle), og dobbeltklikk Start.bat.
+   Får du «Windows beskyttet PCen»: trykk «Mer informasjon» → «Kjør likevel».
+
+   Veiviseren starter, og etterpå settes alle appene opp automatisk.
+   Skriv stier med skråstrek fremover, f.eks. D:/Media
+
+3. Åpne dashboardet:  http://localhost:3000
+   Kontrollpanel (status, innstillinger, logger):  http://localhost:3010
+   Jellyfin:            http://localhost:8096
+
+Oppdatere senere: dobbeltklikk Oppdater.bat.
+
+Tips: skru av dvale, og la Docker Desktop starte når du logger inn.
+Transkoding skjer med prosessoren på Windows. Alt står i README.md.

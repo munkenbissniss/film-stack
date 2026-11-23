@@ -1,0 +1,21 @@
+FILM-STACK FOR LINUX – KOM I GANG
+=================================
+
+1. Pakk ut og åpne en terminal i mappa:
+       unzip film-stack-linux.zip && cd film-stack
+
+2. Start:
+       ./start.sh
+
+   Første gang tilbyr skriptet å installere Docker, og kjører veiviseren.
+   Etterpå starter alt, og du ser at appene settes opp automatisk.
+
+3. Åpne dashboardet:  http://<maskinens-ip>:3000
+   Kontrollpanel (status, innstillinger, logger):  http://<maskinens-ip>:3010
+   Jellyfin:            http://<maskinens-ip>:8096
+
+Oppdatere senere:  ./oppdater.sh
+
+Bærbar eller hjemmeserver? Se linux/01-prepare-host.sh (ingen dvale,
+lokket kan lukkes, Docker og Tailscale) og linux/02-mount-disk.sh
+(monter mediedisken fast). Alt står i README.md.

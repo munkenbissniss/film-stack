@@ -1,0 +1,7 @@
+# Linux: Plex på vertens nettverk – best LAN-oppdagelse og fjerntilgang.
+# Velges automatisk av veiviseren på Linux (ikke Docker Desktop).
+services:
+  plex:
+    network_mode: host
+    ports: !reset []
+    extra_hosts: !reset []

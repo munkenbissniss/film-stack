@@ -1,0 +1,22 @@
+FILM-STACK FOR LINUX – GETTING STARTED
+======================================
+
+1. Unzip and open a terminal in the folder:
+       unzip film-stack-linux.zip && cd film-stack
+
+2. Start:
+       ./start.sh
+
+   The first time, the script offers to install Docker and runs the wizard.
+   Then everything starts, and you can watch the apps being set up.
+   The wizard is in Norwegian: "j" means yes, "n" means no. Press Enter to
+   accept the suggestion in [brackets]. README.en.md explains each question.
+
+3. Open the dashboard:  http://<machine-ip>:3000
+   Control panel (status, settings, logs):  http://<machine-ip>:3010
+   Jellyfin:            http://<machine-ip>:8096
+
+Update later:  ./oppdater.sh
+
+Home server? See linux/01-prepare-host.sh (no sleep, Docker and Tailscale)
+and linux/02-mount-disk.sh (mount the disk permanently). See README.en.md.
